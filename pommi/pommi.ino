@@ -1,8 +1,6 @@
-#include <Wire.h> 
-#include <LiquidCrystal_I2C.h>
-
 int seed = 71551;
 int n_functions = 7;
+int potentiometer_pin = A0;
 typedef bool (*module_function)(int);
 module_function functions[] = {&moduuli1,
                                &moduuli2,
@@ -11,25 +9,20 @@ module_function functions[] = {&moduuli1,
                                &moduuli5,
                                &moduuli6,
                                &moduuli7};
-
-
-LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); 
+int led_pins[] = {2, 3, 4, 5, 6, 7, 8};
 
 void setup() {
   randomSeed(seed);
   for (int pin = 8; pin > 1; pin--) {
     pinMode(pin, OUTPUT);
   }
-  lcd.begin(20,4);
-  lcd.print("Testi");
+  pinMode(potentiometer_pin, INPUT);
+  
 }
 
 void loop() {
-  module_function *f = functions;
-  shuffle(functions, n_functions);
-  for (int i = 0; i < n_functions; i++) {
-    functions[i](seed);
-  }
+  int potentiometer_value = analogRead(potentiometer_pin);
+  light_leds(ceil(potentiometer_value/1023.0 * 7.0), led_pins, 7);
 
 }
 
@@ -83,3 +76,13 @@ void shuffle(module_function *funs, int len) {
     funs[r] = tmp;
   }
 }
+
+void light_leds(int n, int *pins, int n_pins){
+  for(int i=0; i < n_pins; i++){
+    digitalWrite(pins[i], LOW);
+  }
+  for(int i=0; i < n; i++){
+    digitalWrite(pins[i], HIGH);
+  }
+}
+
