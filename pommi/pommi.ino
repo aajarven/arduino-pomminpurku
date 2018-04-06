@@ -1,3 +1,6 @@
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+
 int seed = 71551;
 int n_functions = 7;
 typedef bool (*module_function)(int);
@@ -10,12 +13,15 @@ module_function functions[] = {&moduuli1,
                                &moduuli7};
 
 
+LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); 
 
 void setup() {
   randomSeed(seed);
   for (int pin = 8; pin > 1; pin--) {
     pinMode(pin, OUTPUT);
   }
+  lcd.begin(20,4);
+  lcd.print("Testi");
 }
 
 void loop() {
