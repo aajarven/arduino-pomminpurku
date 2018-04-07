@@ -29,6 +29,12 @@ void setup() {
 }
 
 void loop() {
+//  module_function *f = functions;
+//  shuffle(functions, n_functions);
+//  for (int i = 0; i < n_functions; i++) {
+//    functions[i](seed);
+//  }
+
   if (potikka_puzzle()){
     lcd.clear();
     lcd.print("potikkapuzzle ok");
