@@ -7,7 +7,7 @@ int n_functions = 7;
 int potentiometer_pin = A0;
 
 typedef bool (*module_function)();
-module_function functions[] = {&potikka_puzzle,
+module_function functions[] = {&potentiometer_puzzle,
                                &moduuli2,
                                &moduuli3,
                                &moduuli4,
@@ -35,14 +35,14 @@ void loop() {
 //    functions[i](seed);
 //  }
 
-  if (potikka_puzzle()){
+  if (potentiometer_puzzle()){
     lcd.clear();
     lcd.print("potikkapuzzle ok");
   }
   delay(5000);
 }
 
-bool potikka_puzzle() {
+bool potentiometer_puzzle() {
   int rounds = 0;
   int target = random(1, 50);
   int correct_cycles = 0;
