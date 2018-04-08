@@ -4,12 +4,16 @@
 int seed = 71551;
 int n_functions = 7;
 
+// final pins
 int potentiometer_pin = A0;
 int button1_pin = 5;
 
+// temporary pins
+int *switch_pins[] = {10, 11, 12, 13};
+
 typedef bool (*module_function)();
 module_function functions[] = {&potentiometer_puzzle,
-                               &moduuli2,
+                               &switch_puzzle,
                                &moduuli3,
                                &moduuli4,
                                &moduuli5,
@@ -28,6 +32,11 @@ void setup() {
   pinMode(button1_pin, INPUT);
   lcd.begin(20,4);
   lcd.backlight();
+
+  // temporary settings
+  for (int pin = 0; pin < 4; pin++){
+    pinMode(switch_pins[pin], INPUT);
+  }
 }
 
 void loop() {
@@ -37,17 +46,33 @@ void loop() {
 //    functions[i](seed);
 //  }
 
-  if (potentiometer_puzzle()){
+//  if (potentiometer_puzzle()){
+//    lcd.clear();
+//    lcd.print("potikkapuzzle ok");
+//  } else {
+//    lcd.clear();
+//    lcd.print("potikkapuzzle epaonnistui");
+//  }
+//  delay(5000);
+
+  if (switch_puzzle()){
     lcd.clear();
-    lcd.print("potikkapuzzle ok");
+    lcd.print("switchit ok");
   } else {
     lcd.clear();
-    lcd.print("potikkapuzzle epaonnistui");
+    lcd.print("switchit ei ok");
   }
   delay(5000);
+  
 }
 
 bool potentiometer_puzzle() {
+  /**
+   * Requires the user to adjust the potentiometer to the given value,
+   * press the button down and adjust the potentiometer to a new value
+   * while holding the button down. If the button is pressed or released
+   * on a wrong value, the puzzle is failed, otherwise successful.
+   */
   int range_min = 1;
   int range_max = 50;
   int target = random(range_min, range_max);
@@ -56,23 +81,28 @@ bool potentiometer_puzzle() {
   while(true){
     potentiometer_value = map(analogRead(potentiometer_pin), 0, 1023, range_min - 1, range_max);
     display_potentiometer(target, potentiometer_value);
+    
     if (digitalRead(button1_pin) == HIGH){
       if (potentiometer_value == target){
         target = random(range_min, range_max);
+        
         while(digitalRead(button1_pin) == HIGH){
           potentiometer_value = map(analogRead(potentiometer_pin), 0, 1023, range_min - 1, range_max);
           display_potentiometer(target, potentiometer_value);
           delay(200);
         }
+        
         if (potentiometer_value == target){
           return true;
         } else {
           return false;
         }
+        
       } else {
         return false;
       }
     }
+    
     delay(200);
   }
 }
@@ -85,10 +115,32 @@ void display_potentiometer(int target, int value){
     lcd.print(value);
 }
 
-bool moduuli2() {
-  digitalWrite(3, HIGH);
-  delay(500);
-  digitalWrite(3, LOW);
+bool switch_puzzle() {
+  /**
+   * Shows the correct order 
+   */
+  bool target_states[] = {false, false, false, false};
+  bool switch_states[] = {false, false, false, false};
+  for (int i = 0; i < 4; i++) {
+    target_states[i] = random(0,2) == 1;
+  }
+  while(true) {
+    update_switches(switch_states);
+    lcd.clear();
+    for (int i=0; i<4; i++){
+      lcd.print(target_states[i]);
+      lcd.print(" ");
+    }
+    if (digitalRead(button1_pin) == HIGH) {
+      for (int i = 0; i < 4; i++) {
+        if (target_states[i] != switch_states[i]){
+          return false;
+        }
+      }
+      return true;
+    }
+    delay(200);
+  }
 }
 
 bool moduuli3() {
@@ -127,6 +179,12 @@ void shuffle(module_function *funs, int len) {
     module_function tmp = funs[i];
     funs[i] = funs[r];
     funs[r] = tmp;
+  }
+}
+
+void update_switches(bool *states){
+  for(int i = 0; i<4; i++){
+    states[i] = digitalRead(switch_pins[i]) == HIGH;
   }
 }
 
