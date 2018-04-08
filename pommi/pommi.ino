@@ -1,7 +1,7 @@
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 
-int seed = 71551;
+int seed = 7155;
 int n_functions = 7;
 
 // final pins
@@ -46,14 +46,14 @@ void loop() {
 //    functions[i](seed);
 //  }
 
-//  if (potentiometer_puzzle()){
-//    lcd.clear();
-//    lcd.print("potikkapuzzle ok");
-//  } else {
-//    lcd.clear();
-//    lcd.print("potikkapuzzle epaonnistui");
-//  }
-//  delay(5000);
+  if (potentiometer_puzzle()){
+    lcd.clear();
+    lcd.print("potikkapuzzle ok");
+  } else {
+    lcd.clear();
+    lcd.print("potikkapuzzle epaonnistui");
+  }
+  delay(5000);
 
   if (switch_puzzle()){
     lcd.clear();
