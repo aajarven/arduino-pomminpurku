@@ -5,6 +5,7 @@ int seed = 71551;
 int n_functions = 7;
 
 int potentiometer_pin = A0;
+int button1_pin = 5;
 
 typedef bool (*module_function)();
 module_function functions[] = {&potentiometer_puzzle,
@@ -24,6 +25,7 @@ void setup() {
     pinMode(pin, OUTPUT);
   }
   pinMode(potentiometer_pin, INPUT);
+  pinMode(button1_pin, INPUT);
   lcd.begin(20,4);
   lcd.backlight();
 }
@@ -38,39 +40,49 @@ void loop() {
   if (potentiometer_puzzle()){
     lcd.clear();
     lcd.print("potikkapuzzle ok");
+  } else {
+    lcd.clear();
+    lcd.print("potikkapuzzle epaonnistui");
   }
   delay(5000);
 }
 
 bool potentiometer_puzzle() {
-  int rounds = 0;
-  int target = random(1, 50);
-  int correct_cycles = 0;
+  int range_min = 1;
+  int range_max = 50;
+  int target = random(range_min, range_max);
+  int potentiometer_value;
   
   while(true){
-    int potentiometer_value = map(analogRead(potentiometer_pin), 0, 1023, 0, 50);
-    if (potentiometer_value == target) {
-      correct_cycles++;
-      if (correct_cycles > 5){
-        rounds++;
-        if (rounds > 1) {
+    potentiometer_value = map(analogRead(potentiometer_pin), 0, 1023, range_min - 1, range_max);
+    display_potentiometer(target, potentiometer_value);
+    if (digitalRead(button1_pin) == HIGH){
+      if (potentiometer_value == target){
+        target = random(range_min, range_max);
+        while(digitalRead(button1_pin) == HIGH){
+          potentiometer_value = map(analogRead(potentiometer_pin), 0, 1023, range_min - 1, range_max);
+          display_potentiometer(target, potentiometer_value);
+          delay(200);
+        }
+        if (potentiometer_value == target){
           return true;
         } else {
-          target = random(1, 50);
-          correct_cycles = 0;
+          return false;
         }
+      } else {
+        return false;
       }
-    } else {
-      correct_cycles = 0;
     }
-    
+    delay(200);
+  }
+}
+
+void display_potentiometer(int target, int value){
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print(target);
     lcd.setCursor(0,1);
-    lcd.print(potentiometer_value);
-    delay(200);
-  }
+    lcd.print(value);
 }
 
 bool moduuli2() {
