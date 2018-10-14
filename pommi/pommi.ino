@@ -13,6 +13,7 @@ int analog_pin_values[N_ANALOG_PINS];
 // final pins
 int potentiometer_pin = A0;
 int button1_pin = 5;
+int button2_pin = 6;
 
 // temporary pins
 int *switch_pins[] = {10, 11, 12, 13};
@@ -49,6 +50,7 @@ struct TextRow {
 };
 
 void setup() {
+  Serial.begin(9600);
   
   randomSeed(seed);
   for (int pin = 8; pin > 1; pin--) {
@@ -71,9 +73,8 @@ void loop() {
   //  for (int i = 0; i < n_functions; i++) {
   //    functions[i](seed);
   //  }
-  
-  display_message("tosi|pitka|sana|tatapas|et|saa|naytolle|kerralla testi testi tassaeioletavutusvihjeitamahtaavituttaa testi testi testi testi asdf fdsa");
 
+  display_message("Jukolan talo, ete|lai|ses|sa Hameessa, seisoo eraan maen poh|joi|sel|la rin|teel|la, liki Toukolan kylaa. Sen la|hei|sin ym|pa|ris|to on kivinen tanner, mutta alempana alkaa pellot, joissa, ennenkuin talo oli havioon mennyt, aaltoili terainen vilja.");
   read_digital_values(digital_pin_values);
   read_analog_values(analog_pin_values);
 
@@ -381,7 +382,7 @@ void display_message(String message) {
   int top_row_index = 0;
   struct TextRow *top_row = first_row;
   bool refresh = true;
-  while (top_row_index <= rows){
+  while (top_row_index < rows){
     struct TextRow *printed = top_row;
     if (refresh){
       lcd.clear();
@@ -400,17 +401,42 @@ void display_message(String message) {
       while(digitalRead(button1_pin) == HIGH){
         delay(buttondelay);
       }
-      top_row = (*top_row).next;
-      top_row_index++;
-      refresh = true;
+      for (int i=0; i<screen_height; i++){
+        top_row = (*top_row).next;
+        top_row_index++;
+        refresh = true;
+        
+        if (!(*top_row).next){
+          break;
+        }
+      }
       delay(buttondelay);
+    }
+
+    // move backward?
+    if (top_row_index > 0) {
+      if (digitalRead(button2_pin) == HIGH) {
+        while(digitalRead(button2_pin) == HIGH){
+          delay(buttondelay);
+        }
+        for (int i=0; i<screen_height; i++){
+          top_row = (*top_row).previous;
+          top_row_index--;
+          refresh = true;
+          
+          if (!(*top_row).previous){
+            break;
+          }
+        }
+        delay(buttondelay);
+      }
     }
   }
 
   // free the memory
   freeTexts(first_row);
-  
 }
+
 
 void freeTexts(struct TextRow *message){
   struct TextRow *current_row = message;
