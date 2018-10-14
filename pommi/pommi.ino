@@ -74,7 +74,11 @@ void loop() {
   //    functions[i](seed);
   //  }
 
-  display_message("Jukolan talo, ete|lai|ses|sa Hameessa, seisoo eraan maen poh|joi|sel|la rin|teel|la, liki Toukolan kylaa. Sen la|hei|sin ym|pa|ris|to on kivinen tanner, mutta alempana alkaa pellot, joissa, ennenkuin talo oli havioon mennyt, aaltoili terainen vilja.");
+  display_message("Jukolan talo, ete|lai|ses|sa Hameessa, "
+    "seisoo eraan maen poh|joi|sel|la rin|teel|la, liki "
+    "Toukolan kylaa. Sen la|hei|sin ym|pa|ris|to on kivinen "
+    "tanner, mutta alempana alkaa pellot, joissa, ennenkuin "
+    "talo oli havioon mennyt, aaltoili terainen vilja.");
   read_digital_values(digital_pin_values);
   read_analog_values(analog_pin_values);
 
@@ -371,20 +375,25 @@ void display_message(String message) {
   struct TextRow *first_row = split_message(message, screen_width);
 
   // count rows
-  int rows = 0;
+  int rows = 1;
   struct TextRow *message_row = first_row;
+  Serial.println((*message_row).text);
   while((*message_row).next) {
     rows++;
     message_row = (*message_row).next;
+    Serial.println((*message_row).text);
   }
 
   // show the text
   int top_row_index = 0;
   struct TextRow *top_row = first_row;
   bool refresh = true;
-  while (top_row_index < rows){
-    struct TextRow *printed = top_row;
+  bool show_text = true;
+  
+  while (show_text){
+    
     if (refresh){
+      struct TextRow *printed = top_row;
       lcd.clear();
       for (int i=0; i<screen_height; i++){
           if (top_row_index + i <= rows) {
@@ -401,15 +410,21 @@ void display_message(String message) {
       while(digitalRead(button1_pin) == HIGH){
         delay(buttondelay);
       }
+      
+      refresh = true;
+      
       for (int i=0; i<screen_height; i++){
         top_row = (*top_row).next;
         top_row_index++;
-        refresh = true;
         
         if (!(*top_row).next){
-          break;
+          if (i < screen_height - 1){ // running out of rows before a screenful
+            show_text = false;
+            break;
+          }
         }
       }
+      
       delay(buttondelay);
     }
 
@@ -436,7 +451,6 @@ void display_message(String message) {
   // free the memory
   freeTexts(first_row);
 }
-
 
 void freeTexts(struct TextRow *message){
   struct TextRow *current_row = message;
