@@ -87,21 +87,6 @@ void shuffle(module_function *funs, int len) {
   }
 }
 
-void wait_for_button_press(int pin){
-  /**
-   * Waits until button has been pressed and released
-   */
-    // wait for button press
-  while(digitalRead(button_forward_pin) != HIGH) {
-    delay(50);
-  }
-
-  // wait for button release
-  while(digitalRead(button_forward_pin) != LOW) {
-    delay(50);
-  }
-}
-
 struct TextRow* split_message(String message, int row_length) {
   /**
    * Splits the given string to pieces with a maximum length of the given row_length.
