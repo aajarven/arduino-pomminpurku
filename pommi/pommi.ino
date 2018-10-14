@@ -396,7 +396,7 @@ void display_message(String message) {
       struct TextRow *printed = top_row;
       lcd.clear();
       for (int i=0; i<screen_height; i++){
-          if (top_row_index + i <= rows) {
+          if (top_row_index + i < rows) {
             lcd.setCursor(0, i);
             lcd.print((*printed).text);
             printed = (*printed).next;
